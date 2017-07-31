@@ -4,8 +4,8 @@ A reference implementation of the algorithm proposed in https://arxiv.org/abs/17
 
 # To build run in the command line:
 
-$ make clean<br>
-$ make
+<code>$ make clean</code><br>
+<code>$ make</code>
 
 # Command line options:
 
