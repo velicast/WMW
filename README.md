@@ -1,6 +1,6 @@
 # HAMUHI
 
-A reference implementation of the algorithm proposed in https://arxiv.org/abs/1707.02362
+A fast heuristic algorithm for community detection in large-scale complex networks. This is a reference implementation of the algorithm proposed in https://arxiv.org/abs/1707.02362
 
 # To build run in the command line:
 
