@@ -201,16 +201,17 @@ public:
 
   int find(int x) {
   
-    int i = 0, path[8];
+    int i = x, j;
 
-    while (x != set[x]) {
-      path[i++] = x;
-      x = set[x];
+    while (i != set[i]) {
+      i = set[i];
     }
-    while (i) {
-      set[path[--i]] = x;
+    while (x != i) {
+      j = set[x];
+      set[x] = i;
+      x = j;
     }
-    return x;
+    return i;
   }
 
   int size(int x) {
