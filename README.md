@@ -11,7 +11,7 @@ A fast heuristic algorithm for community detection in large-scale complex networ
 
 <code><b>-i</b></code> Input file with the graph in edge list format<br>
 <code><b>-o</b></code> Output file for membership for each vertex in the graph.<br>
-<code><b>-g</b></code> Output graph in format GML with vertices membership (Useful for visual exploratory analysis in Gephi).<br>
+<code><b>-g</b></code> Output graph in GML format with membership (Useful for visual exploratory analysis in Gephi).<br>
 <code><b>-s</b></code> Output community size distribution.<br>
 <code><b>-c</b></code> Community Definition. 0 for Weak definition, 1 for Weakest definition. Default value 0.<br>
 <code><b>-k</b></code> Minimum community size in the result. Default value 2.<br>
@@ -22,7 +22,7 @@ A fast heuristic algorithm for community detection in large-scale complex networ
 
 # NOTES:
 
-Self-loops are skipped.<br>
+Self-loops are removed.<br>
 The vertices are numbered from 0 to N, where N is the highest identifier in the input graph.<br>
 Zero degree vertices are skipped.<br>
 The input graph is considered undirected.<br>
