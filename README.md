@@ -1,30 +1,36 @@
-# HAMUHI
+# TeethClassifier (2017)
+Image Classifier - Classify frontal faces into two classes: shows teeth and shows not teeth
 
-A fast heuristic algorithm for community detection in large-scale complex networks. This is a reference implementation of the algorithm proposed in https://arxiv.org/abs/1707.02362
+Technologies:
+ - Python 2.7
+ - Tensor Flow
+ - OpenCV
+ - Scikit-neuralnetworks
+ - Scikit-learn
+ - Scikit-images
+ - numpy
+ - Convolutional Neural Networks
+ - ImageNet
 
-# To build run in the command line:
+# How to Run First Prototype
 
-<code>$ make clean</code><br>
-<code>$ make</code>
+<b>Training</b>
 
-# Command line options:
+<code>python tf_trainer.py --bottleneck_dir=bottlenecks --how_many_training_steps=4000 --model_dir=inception --summaries_dir=training_summaries/basic --output_graph=retrained_graph.pb --output_labels=retrained_labels.txt --image_dir=teeth_images_org/ --learning_rate=0.005</code>
 
-<code><b>-i</b></code> Input file with the graph in edge list format<br>
-<code><b>-o</b></code> Output file for membership for each vertex in the graph.<br>
-<code><b>-g</b></code> Output graph in GML format with membership (Useful for visual exploratory analysis in Gephi).<br>
-<code><b>-s</b></code> Output community size distribution.<br>
-<code><b>-c</b></code> Community Definition. 0 for Weak definition, 1 for Weakest definition. Default value 0.<br>
-<code><b>-k</b></code> Minimum community size in the result. Default value 2.<br>
+<b>Classification</b>
 
-# Example:
+<code>python tf_classifier.py ./B ./results</code>
+ 
+ # How to Run Second Prototype
 
-<code>./hamuhi -i input_graph -o output_membership -g output_gml -s output_size_dist -c 0 -k 2</code>
+<b>Training the CNN</b>
 
-# NOTES:
+<code>python sknn_trainer.py ./all_teeth_org/ cnn_graph.nn ov 0</code>
 
-Self-loops are removed.<br>
-The vertices are numbered from 0 to N, where N is the highest identifier in the input graph.<br>
-Zero degree vertices are skipped.<br>
-The input graph is considered undirected.<br>
+<b>Classification</b>
 
-<i><b>This code is not intended for production.</b></i>
+<code>python sknn_classifier.py ./B ./results cnn_graph.nn</code>
+
+<code>./B</code> is the directory with the images to classify<br>
+<code>./results</code> is the directory where the classified images will be saved, one sub-directory for each class
