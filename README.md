@@ -23,7 +23,7 @@ A fast heuristic algorithm for community detection in large-scale complex networ
 <code><b>--min_comm_size -K</b></code> Minimum community size in the result. Default value 3.<br>
 <code><b>--dss_iterations -I</b></code> Number of iterations to perform by the Dynamic Structural Similarity.<br>
 <code><b>--overlap -O</b></code> Detect overlapping communities: 0 for fuzzy communities. 1 for crisp communities with threshold -T.<br>
-<code><b>--crisp_threshold -T</b></code> Threshold used to generate the crisp overlapping communities. If this option is not specified, a threshold is automatically chosen by the algorithm. Common values {0.001, 0.005, 0.1, 0.02, 0.03, 0.04, 0.05}<br>
+<code><b>--crisp_threshold -T</b></code> Threshold used to generate the crisp overlapping communities. If this option is not specified, a threshold is automatically chosen by the algorithm. Common values {0.001, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05}<br>
 
 # Example of Disjoint Community Detection:
 
