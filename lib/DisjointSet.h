@@ -1,158 +1,6 @@
 #ifndef DISJOINT_SET_H
 #define DISJOINT_SET_H
 
-class DSSetList {
-
-public:
-  struct Node {
-    Node *next;
-    Node *prev;
-    int id;
-  };
-
-  DSSetList (int capacity) {
-    
-    size = 0;
-    index = new Node*[capacity];
-    head = 0;
-    
-    for (int i = 0; i < capacity; i++) {
-      Node *n = new Node;
-      n->id = i;
-      n->next = n->prev = 0;
-      index[i] = n;
-    }
-  }
-
-  ~DSSetList () {
-    
-    while (head) {
-      Node *del = head;
-      head = head->next;
-      delete del;
-    }
-    delete [] index;
-  }
-
-  void del(int set_id) {
-
-    Node *node = index[set_id];
-
-    if (node == head) {
-      head = head->next;
-    }
-    if (node->prev) {
-      node->prev->next = node->next;
-    }
-    if (node->next) {
-      node->next->prev = node->prev;
-    }
-    node->next = node->prev = 0;
-    size--;
-  }
-  
-  void add(int set_id) {
-    
-    Node *node = index[set_id];
-
-    if (head) {
-      head->prev = node;
-    }
-    node->next = head;
-    head = node;
-    size++;
-  }
-
-  int size;
-  Node *head;
-  Node **index;
-};
-
-class DSSetIterator {
-  
-public:
-  
-  bool hasNext() {
-    return ptr;
-  }
-  
-  int next() {
-  
-    int id = ptr->id;
-    ptr = ptr->next;
-    return id;
-  }
-  DSSetList::Node *ptr;
-};
-
-class DSMemberList {
-
-public:
-  struct Node {
-    Node *next;
-    int id;
-  };
-
-  DSMemberList() {
-    
-    size = 0;
-    head = tail = 0;
-  }
-  
-  ~DSMemberList() {
-    
-    while (head) {
-      Node *del = head;
-      head = head->next;
-      delete del;
-    }
-  }
-  
-  void add(int x) {
-    
-    Node *n = new Node;
-    n->id = x;
-    n->next = 0;
-    
-    if (!head) {
-      head = tail = n;
-    } else {
-      tail->next = n;
-      tail = n;
-    }
-    size++;
-  }
-
-  void append(DSMemberList *list) {
-  
-    tail->next = list->head;
-    tail = list->tail;
-    list->head = list->tail = 0;
-    size += list->size;
-  }
-  
-  int size;
-  Node *head;
-  Node *tail;
-};
-
-class DSMemberIterator {
-
-public:
-  
-  bool hasNext() {
-    return ptr;
-  }
-  
-  int next() {
-  
-    int id = ptr->id;
-    ptr = ptr->next;
-    return id;
-  }
-  DSMemberList::Node *ptr;
-};
-
 class DisjointSet {
 
 public:
@@ -161,23 +9,20 @@ public:
     this->num_sets = n;
     set = new int[n];
     rank = new int[n];
-    set_ids = new DSSetList (n);
-    set_members = new DSMemberList[n];
+    sz = new int[n];
     
     for (n--; n >= 0; n--) {
       set[n] = n;
       rank[n] = 0;
-      set_members[n].add(n);
-      set_ids->add(n);
+      sz[n] = 1;
     }
   }
 
   ~DisjointSet() {
 
-    delete set_ids;
-    delete [] set_members;
     delete [] set;
     delete [] rank;
+    delete [] sz;
   }
 
   int merge(int x, int y) {
@@ -194,13 +39,12 @@ public:
     }
     --num_sets;
     set[y] = x;
-    set_ids->del(y);
-    set_members[x].append(&set_members[y]);
+    sz[x] += sz[y];
+    sz[y] = 0;
     return x;
   }
 
   int find(int x) {
-  
     int i = x, j;
 
     while (i != set[i]) {
@@ -211,32 +55,17 @@ public:
       set[x] = i;
       x = j;
     }
-    return i;
+    return x;
   }
 
   int size(int x) {
-    return set_members[find(x)].size;
-  }
-
-  DSSetIterator sets() {
-  
-    DSSetIterator it;
-    it.ptr = set_ids->head;
-    return it;
-  }
-
-  DSMemberIterator members(int x) {
-    
-    DSMemberIterator it;
-    it.ptr = set_members[x].head;
-    return it;
+    return sz[find(x)];
   }
   
-  DSMemberList *set_members;
-  DSSetList  *set_ids;
   int num_sets;
   int *set;
   int *rank;
+  int *sz;
 };
 
 #endif

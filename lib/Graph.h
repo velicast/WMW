@@ -3,8 +3,9 @@
 
 #include <algorithm>
 #include <vector>
-#include <unordered_set>
+#include <set>
 #include <cstdlib>
+#include <cstring>
 #include <cfloat>
 
 typedef unsigned long long Key64;
@@ -18,7 +19,6 @@ public:
 
     this->num_vertices = num_vertices;
     this->adj = new int*[num_vertices];
-    this->adj_s = new float*[num_vertices];
     this->adj_sz = new int[num_vertices];
   }
 
@@ -26,10 +26,8 @@ public:
 
     for (int i = 0; i < num_vertices; i++) {
       delete [] adj[i];
-      delete [] adj_s[i];
     }
     delete [] adj;
-    delete [] adj_s;
     delete [] adj_sz;
     delete [] src;
     delete [] dst;
@@ -55,7 +53,7 @@ public:
     
     this->num_edges = v_src.size();
     vector<int> *adj_tmp = new vector<int>[num_vertices];
-    unordered_set<Key64> eh(num_edges);
+    set<Key64> eh;
 
     for (int i = 0; i < num_edges; i++) {
       if (v_src[i] == v_dst[i]) {
@@ -72,8 +70,6 @@ public:
     for (int i = 0; i < num_vertices; i++) {
       adj_sz[i] = adj_tmp[i].size();
       adj[i] = new int[adj_sz[i]];
-      adj_s[i] = new float[adj_sz[i]];
-      memset(adj_s[i], 0, adj_sz[i]*sizeof(float));
       copy(adj_tmp[i].begin(), adj_tmp[i].end(), adj[i]);
       sort(adj[i], adj[i]+adj_sz[i]);
     }
@@ -88,14 +84,13 @@ public:
     }
     eh.clear();
   }
-  
+
   int num_vertices;
   int num_edges;
   int *src;
   int *dst;
   int **adj;
   int *adj_sz;
-  float **adj_s;
 };
 
 #endif

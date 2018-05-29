@@ -1,9 +1,6 @@
 #ifndef CLUSTERING_H
 #define CLUSTERING_H
 
-#include <vector>
-#include <cstring>
-#include <cstdlib>
 #include "DisjointSet.h"
 #include "Graph.h"
 
@@ -36,14 +33,6 @@ public:
 
   int getNumClusters() {
     return clusters->num_sets;
-  }
-
-  DSSetIterator getClusters() {
-    return clusters->sets();
-  }
-
-  DSMemberIterator getMembers(int c) {
-    return clusters->members(c);
   }
   
   Graph *graph;
