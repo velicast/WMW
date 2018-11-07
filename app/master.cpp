@@ -239,6 +239,12 @@ void outputGml(int *membership, Graph &input_graph, double **extS) {
   file_gml.close();
 }
 
+bool fuzzy_cmp(pair<int, double> &a, pair<int, double> &b) {
+  if (a.second < b.second) return true;
+  if (a.second > b.second) return false;
+  return a.first < b.first;
+}
+
 void outputFuzzy(Cover *fuzzy, Graph &input_graph) {
 
   int n = input_graph.num_vertices;
@@ -246,11 +252,7 @@ void outputFuzzy(Cover *fuzzy, Graph &input_graph) {
   if (output_format == PER_NODE_FORMAT) {
     for (int u = 0; u < n; u++) {
       if (fuzzy[u].size()) {
-        sort(fuzzy[u].begin(), fuzzy[u].end(), [](pair<int, double> &a, pair<int, double> &b) {
-          if (a.second < b.second) return true;
-          if (a.second > b.second) return false;
-          return a.first < b.first;
-        });
+        sort(fuzzy[u].begin(), fuzzy[u].end(), fuzzy_cmp);
         cout << u+zero;
       
         for (auto &p : fuzzy[u]) {
