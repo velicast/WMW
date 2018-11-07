@@ -3,7 +3,7 @@
 #include "lib/Modularity.h"
 #include "lib/DisjointSet.h"
 #include "lib/Clustering.h"
-#include "lib/IteratedStructuralSimilarity.h"
+#include "lib/DynamicStructuralSimilarity.h"
 #include "lib/WeakMostWeak.h"
 #include "lib/AsyncWeakMostWeak.h"
 #include <getopt.h>

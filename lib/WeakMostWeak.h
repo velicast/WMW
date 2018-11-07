@@ -3,7 +3,7 @@
 #define WEAK_MOST_WEAK_H
 
 #include "Clustering.h"
-#include "IteratedStructuralSimilarity.h"
+#include "DynamicStructuralSimilarity.h"
 #include <cstring>
 #include <unordered_map>
 #include <utility>
@@ -23,7 +23,7 @@ public:
     
     Clustering *clus = new Clustering(&g);
     double **extS;
-    double *S = IteratedStructuralSimilarity::fixedPoint(g, iss_iters, &extS);
+    double *S = DynamicStructuralSimilarity::fixedPoint(g, iss_iters, &extS);
     
     if (comm_def == WEAK_CLUSTER) {
       weakCluster(*clus, S);

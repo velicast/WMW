@@ -5,7 +5,7 @@
 #include "Clustering.h"
 #include "ExtDisjointSet.h"
 #include "WeakMostWeak.h"
-#include "IteratedStructuralSimilarity.h"
+#include "DynamicStructuralSimilarity.h"
 #include <utility>
 #include <cstring>
 #include <iostream>
@@ -23,7 +23,7 @@ public:
     double **extS;
     ExtDisjointSet *ds;
     
-    delete [] IteratedStructuralSimilarity::fixedPoint(g, iss_iters, &extS);
+    delete [] DynamicStructuralSimilarity::fixedPoint(g, iss_iters, &extS);
     
     if (comm_def == WEAK_CLUSTER) {
       ds = weakCluster(g, extS);
