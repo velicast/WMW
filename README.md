@@ -1,4 +1,4 @@
-# HAMUHI
+# WMW
 
 A fast heuristic algorithm for community detection in large-scale complex networks. This is a reference implementation of the algorithm proposed in https://dl.acm.org/citation.cfm?doid=3110025.3110125, https://arxiv.org/abs/1805.01419, https://arxiv.org/abs/1805.12238
 
