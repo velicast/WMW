@@ -239,7 +239,7 @@ void outputGml(int *membership, Graph &input_graph, double **extS) {
   file_gml.close();
 }
 
-bool fuzzy_cmp(pair<int, double> &a, pair<int, double> &b) {
+bool fuzzy_cmp(const pair<int, double> &a, const pair<int, double> &b) {
   if (a.second < b.second) return true;
   if (a.second > b.second) return false;
   return a.first < b.first;
