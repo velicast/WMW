@@ -38,10 +38,9 @@ Note: The compiler must be compatible with the C++11 standard.
 
 <code>./master -i input_graph.txt -o output_communities.txt -f 1 -C 0 -K 3 -I 2 -O 1 -T 0.05</code>
 
-# NOTES:
+# Notes:
 
-Self-loops are removed.<br>
-Zero degree vertices are skipped.<br>
-The input graph is considered undirected and unweighted.<br>
-
-<i><b>This code is not intended for production.</b></i>
+- Self-loops are removed.<br>
+- Zero degree vertices are skipped.<br>
+- The input graph is considered undirected and unweighted.<br>
+- <i><b>This code is not intended for production.</b></i>
