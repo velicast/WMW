@@ -7,6 +7,8 @@ A fast heuristic algorithm for community detection in large-scale complex networ
 <code>$ make clean</code><br>
 <code>$ make</code>
 
+Note: The compiler must be compatible with the C++11 standard.
+
 # Command line options:
 
 <code><b>--quiet -q</b></code> No verbose. <br>
