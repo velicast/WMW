@@ -17,7 +17,7 @@ Note: The compiler must be compatible with the C++11 standard.
 # Command line options:
 
 <code><b>--quiet -q</b></code> No verbose. <br>
-<code><b>--input_file -i</b></code> Input file with the graph in edge list format: node1 node2.<br>
+<code><b>--input_file -i</b></code> Input file with the graph in edge list format: node1 node2 [weight].<br>
 <code><b>--weighted -w</b></code> The input graph is weighted.<br>
 <code><b>--output_file -o</b></code> Output file with the detected communities in format given by parameter -f.<br>
 <code><b>--output_format -f</b></code> Output format of the detected communities: 0 for node community per line. 1 for community per line<br>
