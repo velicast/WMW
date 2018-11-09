@@ -5,7 +5,6 @@
 #include "lib/Clustering.h"
 #include "lib/DynamicStructuralSimilarity.h"
 #include "lib/WeakMostWeak.h"
-#include "lib/AsyncWeakMostWeak.h"
 #include <getopt.h>
 #include <unistd.h>
 #include <iostream>
@@ -18,24 +17,20 @@
   // Output format
 #define PER_NODE_FORMAT 0
 #define PER_COMMUNITY_FORMAT 1
-  // WeakMostWeak mode
-#define SYNC_WMW  0  // WeakMostWeak Communities
-#define ASYNC_WMW 1  // Asynchronous version of WeakMostWeak algortihm
 
 using namespace std;
 
-int quiet = 0;
+bool quiet = false;
 int file_gml_format = 0;
 int output_format = PER_COMMUNITY_FORMAT;
 
-int wmw_mode = SYNC_WMW;
 int min_size = 3;
 int community_def = NO_DEFINITION;
 int overlap = -1;
-int iss_iters = 5;
-double crisp_threshold = 0.05;
+int dss_iters = 5;
+double crisp_threshold = 0.0;
+bool weighted = false;
 int zero = 0;
-
 fstream file_size_dist;
 fstream file_edge_simis;
 fstream file_membership_dist;
@@ -46,6 +41,7 @@ void parseArgs(int argc, char **argv) {
   
   struct option long_options[] = {
     {"quiet",              no_argument,        0, 'q'},
+    {"weighted",           no_argument,        0, 'w'},    
     {"gml",                required_argument,  0, 'g'},
     {"input_file",         required_argument,  0, 'i'},
     {"output_file",        required_argument,  0, 'o'},
@@ -53,7 +49,6 @@ void parseArgs(int argc, char **argv) {
     {"node_numbering",     required_argument,  0, 'n'},
     {"size_dist_file",     required_argument,  0, 'z'},
     {"edge_sims_file",     required_argument,  0, 's'},
-    {"asynchronous_wmw",   required_argument,  0, 'a'},
     {"memb_dist_file",     required_argument,  0, 'm'},
     {"min_comm_size",      required_argument,  0, 'K'},
     {"community_def",      required_argument,  0, 'C'},
@@ -64,10 +59,13 @@ void parseArgs(int argc, char **argv) {
   };
   int cmd, option_index = 0;
 
-  while ((cmd = getopt_long (argc, argv, "qg:i:o:n:f:z:s:m:aK:C:I:O:T:", long_options, &option_index)) != -1) {
+  while ((cmd = getopt_long (argc, argv, "qwg:i:o:n:f:z:s:m:K:C:I:O:T:", long_options, &option_index)) != -1) {
     if (cmd == 'q') {
-      quiet = 1;
+      quiet = true;
       freopen("/dev/null", "w", stderr);
+    }
+    if (cmd == 'w') {
+      weighted = true;
     }
     else if (cmd == 'g') {
       file_gml.open(optarg, fstream::out | fstream::trunc);
@@ -104,9 +102,6 @@ void parseArgs(int argc, char **argv) {
         cerr << "Invalid option value for " << char(cmd) << ": " << optarg << endl;
         exit(-1);
       }
-    }
-    else if (cmd == 'a') {
-      wmw_mode = ASYNC_WMW;
     }
     else if (cmd == 'z') {
       file_size_dist.open(optarg, fstream::out | fstream::trunc);
@@ -157,9 +152,9 @@ void parseArgs(int argc, char **argv) {
       }
     }
     else if (cmd == 'I') {
-      iss_iters = atoi(optarg);
+      dss_iters = atoi(optarg);
       
-      if (iss_iters < 1) {
+      if (dss_iters < 1) {
         cerr << "Invalid option value for " << char(cmd) << ": " << optarg << endl;
         exit(-1);
       }
@@ -186,25 +181,39 @@ void endTimer() {
 
 Graph *readGraph() {
  
-  int iu, iv, n = 0, i = 0;
-  int u, v;
+  int u, v, n = 0;
+  double w;
   vector<int> vu, vv;
+  vector<double> vw;
 
-  while (cin >> u >> v) {
-    u -= zero;
-    v -= zero;
-    vu.push_back(u);
-    vv.push_back(v);
-    n = max(n, max(u, v));
+  if (weighted) {
+    while (cin >> u >> v >> w) {
+      u -= zero;
+      v -= zero;
+      vu.push_back(u);
+      vv.push_back(v);
+      vw.push_back(w);
+      n = max(n, max(u, v));
+    }
+  } else {
+    while (cin >> u >> v) {
+      u -= zero;
+      v -= zero;
+      vu.push_back(u);
+      vv.push_back(v);
+      vw.push_back(1.0);
+      n = max(n, max(u, v));
+    }
   }
   Graph *g = new Graph(n+1);
-  g->addEdges(vu, vv);
+  g->addEdges(vu, vv, vw);
   vu.clear();
   vv.clear();
+  vw.clear();
   return g;
 }
 
-void outputGml(int *membership, Graph &input_graph, double **extS) {
+void outputGml(int *membership, Graph &input_graph) {
  
   if (!file_gml.is_open()) {
     return;
@@ -226,10 +235,10 @@ void outputGml(int *membership, Graph &input_graph, double **extS) {
     file_gml << "source " << g.src[i]+zero << "\n";
     file_gml << "target " << g.dst[i]+zero << "\n";
     
-    if (extS) {
+    if (g.adj_sim) {
       for (int j = 0; j < g.adj_sz[g.src[i]]; j++) {
         if (g.adj[g.src[i]][j] == g.dst[i]) {
-          file_gml << "label " << extS[g.src[i]][j] << "\n";
+          file_gml << "label " << g.adj_sim[g.src[i]][j] << "\n";
         }
       }
     }
@@ -472,7 +481,7 @@ void outputMembershipDistribution(Cover *fuzzy, vector<int> *crisp, Graph &input
   cerr << setw(w) << num_mem << setw(w) << min_mem << setw(w) << max_mem << endl;
 }
 
-void outputEdgeSimilarity(Graph &input_graph, double **extS) {
+void outputEdgeSimilarity(Graph &input_graph) {
 
   if (!file_edge_simis.is_open()) {
     return;
@@ -482,7 +491,7 @@ void outputEdgeSimilarity(Graph &input_graph, double **extS) {
       int v = input_graph.adj[u][i];
 
       if (u < v) {
-        file_edge_simis << u+zero << " " << v+zero << " " << extS[u][i] << endl;
+        file_edge_simis << u+zero << " " << v+zero << " " << input_graph.adj_sim[u][i] << endl;
       }
     }
   }
@@ -492,61 +501,47 @@ void outputEdgeSimilarity(Graph &input_graph, double **extS) {
 int main(int argc, char **argv) {
   ios_base::sync_with_stdio(false); cout.tie(0); cin.tie(0);
   parseArgs(argc, argv);
-  //cerr << fixed << setprecision(5);
   cout << fixed << setprecision(3);
-  
-  Graph *input_graph = 0;
-  Clustering *communities = 0;
-  Cover *fuzzy = 0;
-  vector<int> *crisp = 0;
-  int *membership = 0;
     
   startTimer();
     cerr << "*** Loading graph... " << endl;
-    input_graph = readGraph();
+    Graph *input_graph = readGraph();
   endTimer();
   
   cerr << "- Vertices: " << input_graph->num_vertices << endl << "- Edges: " << input_graph->num_edges << endl << endl;
-  double **extS = 0;
-  double *S = 0;
-  pair<Clustering *, double **> clustering;
   startTimer();
   
-  if (wmw_mode == SYNC_WMW) {
-    cerr << "*** Running Iterated Structural Similarity -> sync Weak Most Weak ***" << endl;  
-    clustering = WeakMostWeak::cluster(*input_graph, community_def, min_size, iss_iters);
-  }
-  else if (wmw_mode == ASYNC_WMW) {
-    cerr << "*** Running Iterated Structual Similarity -> async Weak Most Weak ***" << endl;
-    clustering = AsyncWeakMostWeak::cluster(*input_graph, community_def, min_size, iss_iters);
-  }
-  extS = clustering.second;
-  communities = clustering.first;
+  cerr << "*** Running Dynamic Structural Similarity -> WMW ***" << endl;  
+  Clustering *clustering = WeakMostWeak::cluster(*input_graph, community_def, min_size, dss_iters);
   
+  Cover *fuzzy = 0;
+  vector<int> *crisp = 0;
+  int *membership = 0;
+
   if (overlap != -1) {
     cerr << "@@@ Computing Overlapping Structure @@@" << endl;
-    fuzzy = OverlappingStructure::fuzzy(*communities, extS);
+    fuzzy = OverlappingStructure::fuzzy(*clustering);
     
     if (overlap == CRISP_OVERLAP) {
-      crisp = OverlappingStructure::crisp(*communities, fuzzy, crisp_threshold);
+      crisp = OverlappingStructure::crisp(*clustering, fuzzy, crisp_threshold);
     }
     else if (overlap == FUZZY_OVERLAP) {
     }
     else {
-      membership = OverlappingStructure::disjoint(*communities, fuzzy);
+      membership = OverlappingStructure::disjoint(*clustering, fuzzy);
     }
   } else {
     membership = new int[input_graph->num_vertices];
     
     for (int i = 0; i < input_graph->num_vertices; i++) {
-      membership[i] = communities->getMembership(i);
+      membership[i] = clustering->getMembership(i);
     }
   }
   endTimer();
-  delete communities;  
+
   outputSizeDistribution(fuzzy, crisp, membership, *input_graph);
   outputMembershipDistribution(fuzzy, crisp, *input_graph);
-  outputEdgeSimilarity(*input_graph, extS);
+  outputEdgeSimilarity(*input_graph);
   
   if (overlap == FUZZY_OVERLAP) {
     outputFuzzy(fuzzy, *input_graph);
@@ -559,13 +554,9 @@ int main(int argc, char **argv) {
   else {
     cerr << fixed << setprecision(3) << "- Modularty: " << Modularity::compute(*input_graph, membership) << endl;
     outputDisjoint(membership, *input_graph);
-    outputGml(membership, *input_graph, extS);
+    outputGml(membership, *input_graph);
     delete [] membership;
   }
-  for (int u = 0; u < input_graph->num_vertices; u++) {
-    delete [] extS[u];
-  }
-  delete [] extS;
   delete input_graph;
   return 0;
 }

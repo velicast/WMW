@@ -25,7 +25,7 @@ typedef vector<pair<int, double> > Cover;
 class OverlappingStructure {
 
 public:
-  static Cover *fuzzy(Clustering &c, double **S) {
+  static Cover *fuzzy(Clustering &c) {
     
     Graph &g = *(c.graph);
     int n = g.num_vertices;
@@ -58,7 +58,7 @@ public:
       for (int i = 0; i < g.adj_sz[u]; i++) {
         int v = g.adj[u][i];
         int com = c.getMembership(v);
-        member(C[u], com).second += S[u][i];
+        member(C[u], com).second += g.adj_sim[u][i];
 
         if (max_w < member(C[u], com).second) {
           max_w = member(C[u], com).second;
@@ -80,7 +80,7 @@ public:
     return C;
   }
   
-  static vector<int> *crisp(Clustering &c, Cover *fuzzy, double threshold = 0.05) {
+  static vector<int> *crisp(Clustering &c, Cover *fuzzy, double threshold = 0.0) {
     
     Graph &g = *(c.graph);
     int n = g.num_vertices;
