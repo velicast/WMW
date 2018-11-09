@@ -29,7 +29,6 @@ int community_def = WEAK_CLUSTER;
 int overlap = -1;
 int dss_iters = 5;
 double crisp_threshold = 0.05;
-bool weighted = false;
 int zero = 0;
 fstream file_size_dist;
 fstream file_edge_simis;
@@ -41,7 +40,6 @@ void parseArgs(int argc, char **argv) {
   
   struct option long_options[] = {
     {"quiet",              no_argument,        0, 'q'},
-    {"weighted",           no_argument,        0, 'w'},    
     {"gml",                required_argument,  0, 'g'},
     {"input_file",         required_argument,  0, 'i'},
     {"output_file",        required_argument,  0, 'o'},
@@ -59,13 +57,10 @@ void parseArgs(int argc, char **argv) {
   };
   int cmd, option_index = 0;
 
-  while ((cmd = getopt_long (argc, argv, "qwg:i:o:n:f:z:s:m:K:C:I:O:T:", long_options, &option_index)) != -1) {
+  while ((cmd = getopt_long (argc, argv, "qg:i:o:n:f:z:s:m:K:C:I:O:T:", long_options, &option_index)) != -1) {
     if (cmd == 'q') {
       quiet = true;
       freopen("/dev/null", "w", stderr);
-    }
-    if (cmd == 'w') {
-      weighted = true;
     }
     else if (cmd == 'g') {
       file_gml.open(optarg, fstream::out | fstream::trunc);
@@ -186,24 +181,13 @@ Graph *readGraph() {
   vector<int> vu, vv;
   vector<double> vw;
 
-  if (weighted) {
-    while (cin >> u >> v >> w) {
-      u -= zero;
-      v -= zero;
-      vu.push_back(u);
-      vv.push_back(v);
-      vw.push_back(w);
-      n = max(n, max(u, v));
-    }
-  } else {
-    while (cin >> u >> v) {
-      u -= zero;
-      v -= zero;
-      vu.push_back(u);
-      vv.push_back(v);
-      vw.push_back(1.0);
-      n = max(n, max(u, v));
-    }
+  while (cin >> u >> v) {
+    u -= zero;
+    v -= zero;
+    vu.push_back(u);
+    vv.push_back(v);
+    vw.push_back(1.0);
+    n = max(n, max(u, v));
   }
   Graph *g = new Graph(n+1);
   g->addEdges(vu, vv, vw);

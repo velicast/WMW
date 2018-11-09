@@ -40,7 +40,7 @@ private:
     Graph &g = *(c.graph);
     int n = g.num_vertices;
     int m = g.num_edges;
-    double *B = new double[n];
+    int *B = new int[n];
     double *max_sim = new double[n];
     vector<int> *to_merge = new vector<int>[n];
     bool merged;
@@ -58,15 +58,15 @@ private:
         int cv = c.getMembership(g.dst[i]);
         
         if (cu == cv) {
-          B[cu] += 2*g.sim[i];
+          B[cu] += 2;
         } else {
-          B[cu] -= g.sim[i];
-          B[cv] -= g.sim[i];
+          B[cu] -= 1;
+          B[cv] -= 1;
           updateCandidates(max_sim, g.sim[i], cu, cv, to_merge);
         }
       }
       for (int i = 0; i < n; i++) {
-        if (flt(B[i], 0.0)) {
+        if (B[i] < 0) {
           for (int com : to_merge[i]) {
             merged |= c.merge(i, com) != -1;
           }
@@ -85,9 +85,9 @@ private:
     int n = g.num_vertices;
     int m = g.num_edges;
     unsigned long long hn = n;
-    unordered_map<unsigned long long, double> H(m);
-    double *B = new double[n];
-    double *D = new double[n];
+    unordered_map<unsigned long long, int> H(m);
+    int *B = new int[n];
+    int *D = new int[n];
     double *max_sim = new double[n];
     vector<int> *to_merge = new vector<int>[n];
     bool merged;
@@ -106,9 +106,9 @@ private:
         int cv = c.getMembership(g.dst[i]);
 
         if (cu == cv) {
-          B[cu] += 2*g.sim[i];
+          B[cu] += 2;
         } else {
-          double f = (H[cu <= cv ? cu*hn+cv : cv*hn+cu] += g.sim[i]);
+          int f = ++H[cu <= cv ? cu*hn+cv : cv*hn+cu];
 
           if (f > D[cu]) {
             D[cu] = f;
@@ -120,7 +120,7 @@ private:
         }
       }
       for (int i = 0; i < n; i++) {
-        if (flt(B[i], D[i])) {
+        if (B[i] < D[i]) {
           for (int com : to_merge[i]) {
             merged |= c.merge(i, com) != -1;
           }
