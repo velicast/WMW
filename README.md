@@ -13,7 +13,7 @@ Papers:
 
 - Self-loops are removed.<br>
 - Zero degree vertices are skipped.<br>
-- The input graph is considered undirected.<br>
+- The input graph is considered unweighted undirected.<br>
 
 # To build run in the command line:
 
