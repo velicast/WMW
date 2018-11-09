@@ -17,95 +17,79 @@ using namespace std;
 class DynamicStructuralSimilarity {
 
 public:
-  static double *fixedPoint(Graph &g, int iters = 2, double ***resS = 0) {
+  static void fixedPoint(Graph &g, int iters = 2) {
      
     int n = g.num_vertices;
     int m = g.num_edges;
-    double **currS = new double*[n];
-    double **nextS = new double*[n];
-    double *S = new double[m];
+    double **next_sim = new double*[n];
     
     for (int u = 0; u < n; u++) {
-      currS[u] = new double[g.adj_sz[u]];
-      nextS[u] = new double[g.adj_sz[u]];
-
-      for (int i = 0; i < g.adj_sz[u]; i++) {
-        currS[u][i] = 1.0;
-      }
+      next_sim[u] = new double[g.adj_sz[u]];
     }
     for (; iters--;) {
       for (int e = 0; e < m; e++) {
-        S[e] = iterate(g, e, currS, nextS);
+        iterate(g, e, next_sim);
       }
-      double **tmp = currS;
-      currS = nextS;
-      nextS = tmp;
-    }
-    if (resS == 0) {
-      for (int u = 0; u < n; u++) {
-        delete [] currS[u];
-      }
-      delete [] currS;
-    } else {
-      *resS = currS;
+      double **tmp = g.adj_sim;
+      g.adj_sim = next_sim;
+      next_sim = tmp;
     }
     for (int u = 0; u < n; u++) {
-      delete [] nextS[u];
+      delete [] next_sim[u];
     }
-    delete [] nextS;
-    return S;
+    delete [] next_sim;
   }
 
 private:
-  static double iterate(Graph &g, int i, double **currS, double **nextS) {
+  static void iterate(Graph &g, int e, double **next_sim) {
     
     double s = 0, sim_u = 0, sim_v = 0;
-    int x = 0, y = 0, u = g.src[i], v = g.dst[i], ux, vy, iu = -1, iv = -1;
+    int i = 0, j = 0, u = g.src[e], v = g.dst[e], x, y, uj = -1, vi = -1;
     
-    for (; x < g.adj_sz[u] && y < g.adj_sz[v];) {
-      ux = g.adj[u][x];
-      vy = g.adj[v][y];
+    for (; i < g.adj_sz[u] && j < g.adj_sz[v];) {
+      x = g.adj[u][i];
+      y = g.adj[v][j];
 
-      if (ux == v) {
-        iv = x;
+      if (x == v) {
+        vi = i;
       }
-      if (vy == u) {
-        iu = y;
+      if (y == u) {
+        uj = j;
       }
-      if (ux == vy) {
-        s += currS[u][x];
-        s += currS[v][y];
-        sim_u += currS[u][x];
-        sim_v += currS[v][y];
-        x++;
-        y++;
+      if (x == y) {
+        s += g.adj_sim[u][i];
+        s += g.adj_sim[v][j];
+        sim_u += g.adj_sim[u][i];
+        sim_v += g.adj_sim[v][j];
+        i++;
+        j++;
       }
-      else if (ux < vy) {
-        sim_u += currS[u][x];
-        x++;
+      else if (x < y) {
+        sim_u += g.adj_sim[u][i];
+        i++;
       }
       else {
-        sim_v += currS[v][y];
-        y++;
+        sim_v += g.adj_sim[v][j];
+        j++;
       }
     }
-    for (; x < g.adj_sz[u]; x++) {
-      sim_u += currS[u][x];
+    for (; i < g.adj_sz[u]; i++) {
+      sim_u += g.adj_sim[u][i];
       
-      if (g.adj[u][x] == v) {
-        iv = x;
+      if (g.adj[u][i] == v) {
+        vi = i;
       }
     }
-    for (; y < g.adj_sz[v]; y++) {
-      sim_v += currS[v][y];
+    for (; j < g.adj_sz[v]; j++) {
+      sim_v += g.adj_sim[v][j];
     
-      if (g.adj[v][y] == u) {
-        iu = y;
+      if (g.adj[v][j] == u) {
+        uj = j;
       }
     }
-    double num = s+currS[u][iv]+currS[v][iu];
+    double num = s+g.adj_sim[u][vi]+g.adj_sim[v][uj];
     double den = sqrt(sim_u*sim_v);
-    return nextS[u][iv] = nextS[v][iu] = num/den;
+    g.sim[e] = next_sim[u][vi] = next_sim[v][uj] = num/den;
   }
 };
 

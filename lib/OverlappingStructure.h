@@ -25,7 +25,7 @@ typedef vector<pair<int, double> > Cover;
 class OverlappingStructure {
 
 public:
-  static Cover *fuzzy(Clustering &c, double **S) {
+  static Cover *fuzzy(Clustering &c) {
     
     Graph &g = *(c.graph);
     int n = g.num_vertices;
@@ -37,7 +37,6 @@ public:
     for (int u = 0; u < n; u++) {
       set<pair<int, double> > s;
       s.insert(make_pair(c.getMembership(u), 0));
-      int u_com = c.getMembership(u);
       
       for (int i = 0; i < g.adj_sz[u]; i++) {
         int v = g.adj[u][i];
@@ -48,28 +47,20 @@ public:
       freq[u] = 0;
     }
     for (int u = 0; u < n; u++) {
-      double max_w = 0.0;
-      double max_com = -1;
-      
-      int u_com = c.getMembership(u);
-      freq[u_com]++;
-      in_freq[freq_sz++] = u_com;
+      double max_connectivity = 0.0;
+      freq[c.getMembership(u)]++;
+      in_freq[freq_sz++] = c.getMembership(u);
       
       for (int i = 0; i < g.adj_sz[u]; i++) {
         int v = g.adj[u][i];
         int com = c.getMembership(v);
-        member(C[u], com).second += S[u][i];
-
-        if (max_w < member(C[u], com).second) {
-          max_w = member(C[u], com).second;
-          max_com = com;
-        }
+        double connectivity = (member(C[u], com).second += g.adj_sim[u][i]);
+        max_connectivity = max_connectivity < connectivity ? connectivity : max_connectivity;
         freq[com]++;
         in_freq[freq_sz++] = com;
       }
       for (auto &p : C[u]) {
-        double add = c.getMembership(u) == max_com ? 1 : 0;
-        p.second = (p.second+add)/(max_w+add)*freq[p.first]/c.getClusterSize(p.first);
+        p.second = p.second/max_connectivity*freq[p.first]/c.getClusterSize(p.first);
       }
       for (;freq_sz;) {
         freq[in_freq[--freq_sz]] = 0;
@@ -86,60 +77,15 @@ public:
     int n = g.num_vertices;
     vector<int> *C = new vector<int>[n];
     
-    if (threshold > 0.0) {
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          if (p.second >= threshold) {
-            C[u].push_back(p.first);
-          }
-        }
-        if (C[u].empty()) {
-          C[u].push_back(u);
+    for (int u = 0; u < n; u++) {
+      for (auto &p : fuzzy[u]) {
+        if (p.second >= threshold) {
+          C[u].push_back(p.first);
         }
       }
-    }
-    else {
-      double *mean  = new double[n];
-      double *std   = new double[n];
-      double *total = new double[n];
-
-      for (int u = 0; u < n; u++) {
-        mean[u] = std[u] = total[u] = 0.0;
+      if (C[u].empty()) {
+        C[u].push_back(u);
       }
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          mean[p.first] += p.second;
-          total[p.first] += 1.0;
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        if (total[u]) {
-          mean[u] /= total[u];
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          std[p.first] += (p.second-mean[p.first])*(p.second-mean[p.first]);
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        if (total[u]) {
-          std[u] = sqrt(std[u]/total[u]);
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          if (p.second > abs(mean[p.first]-std[p.first])) {
-            C[u].push_back(p.first);
-          }
-        }
-        if (C[u].size() == 0) {
-          C[u].push_back(u);
-        }
-      }
-      delete [] mean;
-      delete [] std;
-      delete [] total;
     }
     return C;
   }
