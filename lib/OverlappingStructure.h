@@ -80,66 +80,21 @@ public:
     return C;
   }
   
-  static vector<int> *crisp(Clustering &c, Cover *fuzzy, double threshold = 0.0) {
+  static vector<int> *crisp(Clustering &c, Cover *fuzzy, double threshold = 0.05) {
     
     Graph &g = *(c.graph);
     int n = g.num_vertices;
     vector<int> *C = new vector<int>[n];
     
-    if (threshold > 0.0) {
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          if (p.second >= threshold) {
-            C[u].push_back(p.first);
-          }
-        }
-        if (C[u].empty()) {
-          C[u].push_back(u);
+    for (int u = 0; u < n; u++) {
+      for (auto &p : fuzzy[u]) {
+        if (p.second >= threshold) {
+          C[u].push_back(p.first);
         }
       }
-    }
-    else {
-      double *mean  = new double[n];
-      double *std   = new double[n];
-      double *total = new double[n];
-
-      for (int u = 0; u < n; u++) {
-        mean[u] = std[u] = total[u] = 0.0;
+      if (C[u].empty()) {
+        C[u].push_back(u);
       }
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          mean[p.first] += p.second;
-          total[p.first] += 1.0;
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        if (total[u]) {
-          mean[u] /= total[u];
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          std[p.first] += (p.second-mean[p.first])*(p.second-mean[p.first]);
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        if (total[u]) {
-          std[u] = sqrt(std[u]/total[u]);
-        }
-      }
-      for (int u = 0; u < n; u++) {
-        for (auto &p : fuzzy[u]) {
-          if (p.second > abs(mean[p.first]-std[p.first])) {
-            C[u].push_back(p.first);
-          }
-        }
-        if (C[u].size() == 0) {
-          C[u].push_back(u);
-        }
-      }
-      delete [] mean;
-      delete [] std;
-      delete [] total;
     }
     return C;
   }

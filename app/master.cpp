@@ -25,10 +25,10 @@ int file_gml_format = 0;
 int output_format = PER_COMMUNITY_FORMAT;
 
 int min_size = 3;
-int community_def = NO_DEFINITION;
+int community_def = WEAK_CLUSTER;
 int overlap = -1;
 int dss_iters = 5;
-double crisp_threshold = 0.0;
+double crisp_threshold = 0.05;
 bool weighted = false;
 int zero = 0;
 fstream file_size_dist;
