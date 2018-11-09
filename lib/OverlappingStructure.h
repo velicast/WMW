@@ -37,7 +37,6 @@ public:
     for (int u = 0; u < n; u++) {
       set<pair<int, double> > s;
       s.insert(make_pair(c.getMembership(u), 0));
-      int u_com = c.getMembership(u);
       
       for (int i = 0; i < g.adj_sz[u]; i++) {
         int v = g.adj[u][i];
@@ -48,28 +47,20 @@ public:
       freq[u] = 0;
     }
     for (int u = 0; u < n; u++) {
-      double max_w = 0.0;
-      double max_com = -1;
-      
-      int u_com = c.getMembership(u);
-      freq[u_com]++;
-      in_freq[freq_sz++] = u_com;
+      double max_connectivity = 0.0;
+      freq[c.getMembership(u)]++;
+      in_freq[freq_sz++] = c.getMembership(u);
       
       for (int i = 0; i < g.adj_sz[u]; i++) {
         int v = g.adj[u][i];
         int com = c.getMembership(v);
-        member(C[u], com).second += g.adj_sim[u][i];
-
-        if (max_w < member(C[u], com).second) {
-          max_w = member(C[u], com).second;
-          max_com = com;
-        }
+        double connectivity = (member(C[u], com).second += g.adj_sim[u][i]);
+        max_connectivity = max_connectivity < connectivity ? connectivity : max_connectivity;
         freq[com]++;
         in_freq[freq_sz++] = com;
       }
       for (auto &p : C[u]) {
-        double add = c.getMembership(u) == max_com ? 1 : 0;
-        p.second = (p.second+add)/(max_w+add)*freq[p.first]/c.getClusterSize(p.first);
+        p.second = p.second/max_connectivity*freq[p.first]/c.getClusterSize(p.first);
       }
       for (;freq_sz;) {
         freq[in_freq[--freq_sz]] = 0;
