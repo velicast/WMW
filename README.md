@@ -11,6 +11,7 @@ Papers:
 
 # Release Notes:
 
+- This is the reference implementation of the algorithm described in the thesis.<br>
 - Self-loops are removed.<br>
 - Zero degree vertices are skipped.<br>
 - The input graph is considered unweighted undirected.<br>
