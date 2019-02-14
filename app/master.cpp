@@ -4,7 +4,7 @@
 #include "lib/DisjointSet.h"
 #include "lib/Clustering.h"
 #include "lib/DynamicStructuralSimilarity.h"
-#include "lib/WeakMostWeak.h"
+#include "lib/WeakCommunityDetection.h"
 #include <getopt.h>
 #include <unistd.h>
 #include <iostream>
@@ -25,7 +25,6 @@ int file_gml_format = 0;
 int output_format = PER_COMMUNITY_FORMAT;
 
 int min_size = 3;
-int community_def = WEAK_CLUSTER;
 int overlap = -1;
 int dss_iters = 5;
 double crisp_threshold = 0.05;
@@ -51,7 +50,6 @@ void parseArgs(int argc, char **argv) {
     {"edge_sims_file",     required_argument,  0, 's'},
     {"memb_dist_file",     required_argument,  0, 'm'},
     {"min_comm_size",      required_argument,  0, 'K'},
-    {"community_def",      required_argument,  0, 'C'},
     {"dss_iterations",     required_argument,  0, 'I'},    
     {"overlap",            required_argument,  0, 'O'},
     {"crisp_threshold",    required_argument,  0, 'T'},
@@ -59,7 +57,7 @@ void parseArgs(int argc, char **argv) {
   };
   int cmd, option_index = 0;
 
-  while ((cmd = getopt_long (argc, argv, "qwg:i:o:n:f:z:s:m:K:C:I:O:T:", long_options, &option_index)) != -1) {
+  while ((cmd = getopt_long (argc, argv, "qwg:i:o:n:f:z:s:m:K:I:O:T:", long_options, &option_index)) != -1) {
     if (cmd == 'q') {
       quiet = true;
       freopen("/dev/null", "w", stderr);
@@ -131,14 +129,6 @@ void parseArgs(int argc, char **argv) {
       min_size = atoi(optarg);
       
       if (min_size < 1) {
-        cerr << "Invalid option value for " << char(cmd) << ": " << optarg << endl;
-        exit(-1);
-      }
-    }
-    else if (cmd == 'C') {
-      community_def = atoi(optarg);
-      
-      if (community_def < NO_DEFINITION || community_def > MOST_WEAK_CLUSTER) {
         cerr << "Invalid option value for " << char(cmd) << ": " << optarg << endl;
         exit(-1);
       }
@@ -511,8 +501,8 @@ int main(int argc, char **argv) {
   cerr << "- Vertices: " << input_graph->num_vertices << endl << "- Edges: " << input_graph->num_edges << endl << endl;
   startTimer();
   
-  cerr << "*** Running Dynamic Structural Similarity -> WMW ***" << endl;  
-  Clustering *clustering = WeakMostWeak::cluster(*input_graph, community_def, min_size, dss_iters);
+  cerr << "*** Dynamic Structural Similarity + Weak Community Detection ***" << endl;  
+  Clustering *clustering = WeakCommunityDetection::cluster(*input_graph, min_size, dss_iters);
   
   Cover *fuzzy = 0;
   vector<int> *crisp = 0;
