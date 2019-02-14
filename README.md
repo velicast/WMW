@@ -1,4 +1,4 @@
-# WMW
+# Weighted Weak Community Detecion
 
 A fast heuristic algorithm for community detection in large-scale complex networks. This is a reference implementation of the algorithm proposed in http://bdigital.unal.edu.co/69933/. This repository is integral part of the Master's thesis. 
 
@@ -12,8 +12,8 @@ Papers:
 # Release Notes:
 
 - Added support for weighted graphs.
-- Changed to weighted versions of the community definitions.
-- The weighted Weak definition greatly improves the quality of the result with respect to the original Weak definition. Now it performs quite similar to the Most Weak definition in the LFR benchmark. The most weak definition outperforms (by a little margin) for mixing parameters >= 0.7.
+- Weighted Most Weak community definition has been removed since it performs quite similar to the Weighted Weak community definition. So the parameter -C from previous version is no longer required.
+- Community definition and size detection are now merged into a single loop, so we guarantee the final result contains Weak communities with minimum size desired.
 - Self-loops are removed.<br>
 - Zero degree vertices are skipped.<br>
 - The input graph is considered undirected.<br>
@@ -37,16 +37,15 @@ Note: The compiler must be compatible with the C++11 standard.
 <code><b>--edge_sims_file -s</b></code> Output the dynamic structural similarity for each edge in the graph (node1 node2 similarity).<br>
 <code><b>--memb_dist_file -m</b></code> Output the membership distribution (nodes with X communities vs frequency).<br>
 <code><b>--node_numbering -n</b></code> Index of the first node in the graph. Default to 0. Common values {0, 1}.<br>
-<code><b>--community_def -C</b></code> Community Definition. 0 for Weak definition, 1 for Most Weak definition. Default value 0.<br>
 <code><b>--min_comm_size -K</b></code> Minimum community size in the result. Default value 3.<br>
-<code><b>--dss_iterations -I</b></code> Number of iterations to perform by the Dynamic Structural Similarity. Default to 2.<br>
+<code><b>--dss_iterations -I</b></code> Number of iterations to perform by the Dynamic Structural Similarity. Default to 2 or 3.<br>
 <code><b>--overlap -O</b></code> Detect overlapping communities: 0 for fuzzy communities. 1 for crisp communities with threshold -T. 2 for disjoint communities.<br>
 <code><b>--crisp_threshold -T</b></code> Threshold used to generate the crisp overlapping communities. Common values {0.001, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05}<br>
 
 # Example of Disjoint Community Detection:
 
-<code>./master -i input_graph.txt -o output_memberships.txt -f 0 -g output_gml.gml -C 0 -K 3 -I 2</code>
+<code>./master -i input_graph.txt -o output_memberships.txt -f 0 -g output_gml.gml -K 3 -I 3</code>
 
 # Example of Overlapping Community Detection:
 
-<code>./master -i input_graph.txt -o output_communities.txt -f 1 -C 0 -K 3 -I 2 -O 1 -T 0.05</code>
+<code>./master -i input_graph.txt -o output_communities.txt -f 1 -K 3 -I 3 -O 1 -T 0.05</code>
