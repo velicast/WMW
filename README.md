@@ -3,9 +3,9 @@
 A fast heuristic algorithm for community detection in large-scale complex networks. This is a reference implementation of the algorithm proposed in http://bdigital.unal.edu.co/69933/. This repository is integral part of the Master's thesis. 
 
 Papers:
- - https://dl.acm.org/citation.cfm?doid=3110025.3110125
- - https://arxiv.org/abs/1805.01419
- - https://arxiv.org/abs/1805.12238
+ - Dynamic Structural Similarity on Graphs: https://arxiv.org/abs/1805.01419
+ - Fast Heuristic Algorithm for Multi-Scale Hierarchical Community Detection: https://dl.acm.org/citation.cfm?doid=3110025.3110125
+ - High-Quality Disjoint and Overlapping Community Structure in Large-Scale Complex Networks: https://arxiv.org/abs/1805.12238
  
 <b>Please, check the branches for different versions of the algorithm.</b>
 
