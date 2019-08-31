@@ -53,6 +53,7 @@ private:
           B[cu] -= g.sim[i];
           B[cv] -= g.sim[i];
           updateCandidates(max_sim, g.sim[i], cu, cv, to_merge);
+          updateCandidates(max_sim, g.sim[i], cv, cu, to_merge);
         }
       }
       for (int i = 0; i < n; i++) {
@@ -75,18 +76,9 @@ private:
     if (flt(max_sim[cu], new_sim)) {
       max_sim[cu] = new_sim;
       to_merge[cu].clear();
+    }
+    if (feq(max_sim[cu], new_sim)) {
       to_merge[cu].push_back(cv);
-    }
-    else if (feq(max_sim[cu], new_sim)) {
-      to_merge[cu].push_back(cv);
-    }
-    if (flt(max_sim[cv], new_sim)) {
-      max_sim[cv] = new_sim;
-      to_merge[cv].clear();
-      to_merge[cv].push_back(cu);
-    }
-    else if (feq(max_sim[cv], new_sim)) {
-      to_merge[cv].push_back(cu);
     }
   }
 };
