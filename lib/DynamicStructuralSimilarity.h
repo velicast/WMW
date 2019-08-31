@@ -7,12 +7,36 @@
 #include <climits>
 #include <iomanip>
 #include <cstdlib>
-
+#include <thread>
+#include <atomic>
+#include <vector>
 using namespace std;
 
 #define feq(a, b) (fabs(a-b) <= max(abs(a), abs(b))*DBL_EPSILON || fabs(a-b) <= DBL_EPSILON)
 #define flt(a, b) (!feq(a, b) && a-b < 0.0)
 #define fgt(a, b) (!feq(a, b) && a-b > 0.0)
+
+template<typename Functor>
+void parallel_range(int start, int end, Functor&& f, int num_threads = thread::hardware_concurrency()) {
+
+  atomic<int> index(0);
+  thread *ts = new thread[num_threads];
+
+  for (int i = 0; i < num_threads; i++) {
+    ts[i] = thread([&start, &end, &index, &f]() {
+      int i = index.fetch_add(1);
+      while(i < end) {
+        f(i);
+        i = index.fetch_add(1);
+      }
+    });
+  }
+  for (int i = 0; i < num_threads; i++) {  
+    ts[i].join();
+  }
+  delete [] ts;
+}
+
 
 class DynamicStructuralSimilarity {
 
@@ -27,9 +51,12 @@ public:
       next_sim[u] = new double[g.adj_sz[u]];
     }
     for (; iters--;) {
-      for (int e = 0; e < m; e++) {
+      parallel_range(0, m, [&g, &next_sim](int i) {
+        iterate(g, i, next_sim);
+      });
+      /*for (int e = 0; e < m; e++) {
         iterate(g, e, next_sim);
-      }
+      }*/
       double **tmp = g.adj_sim;
       g.adj_sim = next_sim;
       next_sim = tmp;

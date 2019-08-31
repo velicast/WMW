@@ -476,6 +476,8 @@ void outputEdgeSimilarity(Graph &input_graph) {
   if (!file_edge_simis.is_open()) {
     return;
   }
+  file_edge_simis << setprecision(17);
+  
   for (int u = 0; u < input_graph.num_vertices; u++) {
     for (int i = 0; i < input_graph.adj_sz[u]; i++) {
       int v = input_graph.adj[u][i];
