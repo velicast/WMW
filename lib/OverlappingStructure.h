@@ -90,52 +90,6 @@ public:
     return C;
   }
   
-  static int *disjoint(Clustering &c, Cover *fuzzy) {
-    
-    Graph &g = *(c.graph);
-    int n = g.num_vertices;
-    int *C = new int[n];
-    bool *visited = new bool[n];
-    int *st = new int[n];
-    int st_sz = 0;
-    
-    for (int u = 0; u < n; u++) {
-      visited[u] = 0;
-      double maxi = -1.0;
-      
-      for (auto &p : fuzzy[u]) {
-        if (maxi < p.second) {
-          maxi = p.second;
-          C[u] = p.first;
-        }
-      }
-    }
-    for (int u = 0; u < n; u++) {
-      if (!visited[u]) {
-        int target = C[u];
-        st_sz = 0;
-        st[st_sz++] = u;
-        
-        while (st_sz > 0) {
-          int v = st[--st_sz];
-          C[v] = u;
-          
-          for (int i = 0; i < g.adj_sz[v]; i++) {
-            int k = g.adj[v][i];
-            
-            if (C[k] == target && !visited[k]) {
-              st[st_sz++] = k;
-              visited[k] = true;
-            }
-          }
-        }
-      }
-    }
-    delete [] visited;
-    delete [] st;
-    return C;
-  }
-  
 private:
   static inline pair<int, double> &member(Cover &c, int com) {
     

@@ -1,4 +1,4 @@
-LDFLAGS = -lm
+LDFLAGS = -pthread -lm
 CCFLAGS = -std=c++11 -O3 -I. -Ilib
 CC = g++
 

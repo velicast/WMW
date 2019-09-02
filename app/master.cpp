@@ -24,9 +24,9 @@ bool quiet = false;
 int file_gml_format = 0;
 int output_format = PER_COMMUNITY_FORMAT;
 
-int min_size = 3;
+int min_size = 2;
 int overlap = -1;
-int dss_iters = 5;
+int dss_iters = 2;
 double crisp_threshold = 0.05;
 bool weighted = false;
 int zero = 0;
@@ -136,7 +136,7 @@ void parseArgs(int argc, char **argv) {
     else if (cmd == 'O') {
       overlap = atoi(optarg);
       
-      if (overlap < FUZZY_OVERLAP || overlap > DISJOINT_OVERLAP) {
+      if (overlap < FUZZY_OVERLAP || overlap > CRISP_OVERLAP) {
         cerr << "Invalid option value for " << char(cmd) << ": " << optarg << endl;
         exit(-1);
       }
@@ -517,11 +517,7 @@ int main(int argc, char **argv) {
     if (overlap == CRISP_OVERLAP) {
       crisp = OverlappingStructure::crisp(*clustering, fuzzy, crisp_threshold);
     }
-    else if (overlap == FUZZY_OVERLAP) {
-    }
-    else {
-      membership = OverlappingStructure::disjoint(*clustering, fuzzy);
-    }
+    else if (overlap == FUZZY_OVERLAP) {}
   } else {
     membership = new int[input_graph->num_vertices];
     
